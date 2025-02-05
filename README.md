@@ -1,76 +1,59 @@
 # Pastebin-worker
 
-This is a pastebin that can be deployed on Cloudflare workers. Try it on [shz.al](https://shz.al). 
+这是一个可以部署在Cloudflare Workers上的代码分享平台（pastebin）。你可以在 [paste.thfls.club](https://paste.thfls.club) 上体验。 
 
-**Philosophy**: effortless deployment, friendly CLI usage, rich functionality. 
+**理念**：轻松部署，友好的命令行界面使用体验，功能丰富。 
 
-**Features**:
+**特点**：
+1. 分享代码时，网址短至4个字符。
+2. 自定义代码分享链接。
+4. 随意**更新**和**删除**你的分享内容。
+5. 设定一段时间后**过期**分享内容。
+6. 由PrismJS提供支持的**语法高亮**功能。
+7. 将**Markdown**文件显示为HTML格式。
+8. 可用作网址缩短工具。
+9. 自定义返回的媒体类型（mimetype）。
 
-1. Share your paste with as short as 4 characters
-2. Customize the paste URL
-4. **Update** and **delete** your paste as you want
-5. **Expire** your paste after a period of time
-6. **Syntax highlighting** powered by PrismJS
-7. Display **markdown** file as HTML
-8. Used as a URL shortener
-9. Customize returned mimetype
+## 使用方法
+1. 你可以直接在网站上（如 [paste.thfls.club](https://paste.thfls.club) ）发布、更新、删除你的分享内容。 
+2. 它还提供了便捷的HTTP API。详情请查看 [API参考](doc/api.md) 。你可以通过命令行（使用`curl`或类似工具）轻松调用API。 
+3. [pb](/scripts) 是一个bash脚本，方便在命令行中使用。
 
-## Usage
+## 限制
+1. 如果部署在Cloudflare Worker的免费套餐上，该服务每天最多允许100,000次读取、1000次写入和1000次删除操作。 
+2. 由于Cloudflare KV存储的大小限制，每个分享内容的大小限制在25MB以内。 
 
-1. You can post, update, delete your paste directly on the website (such as [shz.al](https://shz.al)). 
-
-2. It also provides a convenient HTTP API to use. See [API reference](doc/api.md) for details. You can easily call API via command line (using `curl` or similar tools). 
-
-3. [pb](/scripts) is a bash script to make it easier to use on command line.
-
-## Limitations
-
-1. If deployed on Cloudflare Worker free-tier plan, the service allows at most 100,000 reads and 1000 writes, 1000 deletes per day. 
-2. Due to the size limit of Cloudflare KV storage, the size of each paste is bounded under 25 MB. 
-
-## Deploy
-
-You are free to deploy the pastebin on your own domain if you host your domain on Cloudflare. 
-
-1. Install `node` and `yarn`.
-
-2. Create a KV namespace on Cloudflare workers dashboard, remember its ID.
-
-3. Clone the repository and enter the directory.
-
-4. Modify entries in `wrangler.toml`. Its comments will tell you how.
-
-5. Login to Cloudflare and deploy with the following steps:
-
+## 部署
+如果你在Cloudflare上托管你的域名，你可以自由地在自己的域名上部署这个代码分享平台。 
+1. 安装`node`和`yarn`。
+2. 在Cloudflare Workers仪表板上创建一个KV命名空间，记住它的ID。
+3. 克隆这个仓库并进入目录。
+4. 修改`wrangler.toml`中的条目。其中的注释会告诉你如何操作。
+5. 登录Cloudflare并按以下步骤进行部署：
 ```console
 $ yarn install
 $ yarn wrangler login
 $ yarn deploy
 ```
+6. 尽情使用吧！
 
-6. Enjoy!
-
-## Auth
-
-If you want a private deployment (only you can upload paste, but everyone can read the paste), add the following entry to your `wrangler.toml`.
-
+## 认证
+如果你想要一个私人部署（只有你可以上传分享内容，但任何人都可以读取），在你的`wrangler.toml`中添加以下条目：
 ```toml
 [vars.BASIC_AUTH]
 user1 = "passwd1"
 user2 = "passwd2"
 ```
-
-Now every access to POST request, and every access to static pages, requires an HTTP basic auth with the user-password pair listed above. For example:
-
+现在，每次对POST请求的访问，以及对静态页面的每次访问，都需要使用上述列出的用户名 - 密码对进行HTTP基本认证。例如：
 ```console
 $ curl example-pb.com
-HTTP basic auth is required
+需要HTTP基本认证
 
 $ curl -Fc=@/path/to/file example-pb.com
-HTTP basic auth is required
+需要HTTP基本认证
 
 $ curl -u admin1:wrong-passwd -Fc=@/path/to/file example-pb.com
-Error 401: incorrect passwd for basic auth
+错误401：基本认证密码错误
 
 $ curl -u admin1:this-is-passwd-1 -Fc=@/path/to/file example-pb.com
 {
@@ -81,30 +64,29 @@ $ curl -u admin1:this-is-passwd-1 -Fc=@/path/to/file example-pb.com
 }
 ```
 
-## Administration
-Delete a paste:
+## 管理
+删除一个分享内容：
 ```console
-$ yarn delete-paste <name-of-paste>
+$ yarn delete-paste <分享内容名称>
 ```
-
-List pastes:
+列出分享内容：
 ```console
 $ yarn -s wrangler kv:key list --binding PB > kv_list.json
 ```
 
-## Development
-
-Run a local simulator:
+## 开发
+运行本地模拟器：
 ```console
 $ yarn dev
 ```
-
-Run tests:
+运行测试：
 ```console
 $ yarn test
 ```
-
-Run tests with coverage report:
+运行测试并生成覆盖率报告：
 ```console
 $ yarn coverage
 ```
+
+---
+特别感谢原作者，本仓库由天河外国语学校计算机社团Fork并汉化。
