@@ -9,11 +9,8 @@ export function parseFormdata(uint8Array, boundary) {
   function readLine(idx) {
     // return the index before the next '\r\n' occurs after idx
     for (let i = idx; i < uint8Array.length - 1; i++) {
-      if (uint8Array[i] === 0x0D) {
-        i ++
-        if (uint8Array[i] === 0x0A) {
-          return i - 1
-        }
+      if (uint8Array[i] === 0x0D && uint8Array[i + 1] === 0x0A) {
+        return i
       }
     }
     return uint8Array.length
